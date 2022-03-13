@@ -10,23 +10,32 @@ type StartUserStreamService struct {
 	c *Client
 }
 
+type StartUserStreamResponse struct {
+	ListenKey         string
+	RateLimitWeight1m string `json:"rateLimitWeight1m,omitempty"`
+}
+
 // Do send request
-func (s *StartUserStreamService) Do(ctx context.Context, opts ...RequestOption) (listenKey string, err error) {
+func (s *StartUserStreamService) Do(ctx context.Context, opts ...RequestOption) (res *StartUserStreamResponse, err error) {
 	r := &request{
 		method:   http.MethodPost,
 		endpoint: "/api/v3/userDataStream",
 		secType:  secTypeAPIKey,
 	}
-	data, _, err := s.c.callAPI(ctx, r, opts...)
+	res = new(StartUserStreamResponse)
+	var header *http.Header
+	data, header, err := s.c.callAPI(ctx, r, opts...)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	j, err := newJSON(data)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	listenKey = j.Get("listenKey").MustString()
-	return listenKey, nil
+	res.ListenKey = j.Get("listenKey").MustString()
+	res.RateLimitWeight1m = header.Get("X-Mbx-Used-Weight-1m")
+
+	return res, nil
 }
 
 // KeepaliveUserStreamService update listen key
@@ -41,16 +50,25 @@ func (s *KeepaliveUserStreamService) ListenKey(listenKey string) *KeepaliveUserS
 	return s
 }
 
+type KeepaliveResponse struct {
+	RateLimitWeight1m string `json:"rateLimitWeight1m,omitempty"`
+}
+
 // Do send request
-func (s *KeepaliveUserStreamService) Do(ctx context.Context, opts ...RequestOption) (err error) {
+func (s *KeepaliveUserStreamService) Do(ctx context.Context, opts ...RequestOption) (res *KeepaliveResponse, err error) {
 	r := &request{
 		method:   http.MethodPut,
 		endpoint: "/api/v3/userDataStream",
 		secType:  secTypeAPIKey,
 	}
+	res = new(KeepaliveResponse)
+
+	var header *http.Header
 	r.setFormParam("listenKey", s.listenKey)
-	_, _, err = s.c.callAPI(ctx, r, opts...)
-	return err
+	_, header, err = s.c.callAPI(ctx, r, opts...)
+
+	res.RateLimitWeight1m = header.Get("X-Mbx-Used-Weight-1m")
+	return res, err
 }
 
 // CloseUserStreamService delete listen key

@@ -27,7 +27,7 @@ func (s *userStreamServiceTestSuite) TestStartUserStream() {
 
 	listenKey, err := s.client.NewStartUserStreamService().Do(newContext())
 	s.r().NoError(err)
-	s.r().Equal("pqia91ma19a5s61cv6a81va65sdf19v8a65a1a5s61cv6a81va65sdf19v8a65a1", listenKey)
+	s.r().Equal("pqia91ma19a5s61cv6a81va65sdf19v8a65a1a5s61cv6a81va65sdf19v8a65a1", listenKey.ListenKey)
 }
 
 func (s *userStreamServiceTestSuite) TestKeepaliveUserStream() {
@@ -40,7 +40,7 @@ func (s *userStreamServiceTestSuite) TestKeepaliveUserStream() {
 		s.assertRequestEqual(newRequest().setFormParam("listenKey", listenKey), r)
 	})
 
-	err := s.client.NewKeepaliveUserStreamService().ListenKey(listenKey).Do(newContext())
+	_, err := s.client.NewKeepaliveUserStreamService().ListenKey(listenKey).Do(newContext())
 	s.r().NoError(err)
 }
 

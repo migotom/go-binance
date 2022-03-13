@@ -450,11 +450,15 @@ func (s *CancelOrderService) Do(ctx context.Context, opts ...RequestOption) (res
 	if s.origClientOrderID != nil {
 		r.setFormParam("origClientOrderId", *s.origClientOrderID)
 	}
-	data, _, err := s.c.callAPI(ctx, r, opts...)
+	var header *http.Header
+	data, header, err := s.c.callAPI(ctx, r, opts...)
 	if err != nil {
 		return nil, err
 	}
+
 	res = new(CancelOrderResponse)
+	res.RateLimitOrder1m = header.Get("X-Mbx-Order-Count-1m")
+
 	err = json.Unmarshal(data, res)
 	if err != nil {
 		return nil, err
@@ -485,6 +489,7 @@ type CancelOrderResponse struct {
 	OrigType         string           `json:"origType"`
 	PositionSide     PositionSideType `json:"positionSide"`
 	PriceProtect     bool             `json:"priceProtect"`
+	RateLimitOrder1m string           `json:"rateLimitOrder1m,omitempty"`
 }
 
 // CancelAllOpenOrdersService cancel all open orders

@@ -45,7 +45,7 @@ func (s *serverServiceTestSuite) TestServerTime() {
 
 	serverTime, err := s.client.NewServerTimeService().Do(newContext())
 	s.r().NoError(err)
-	s.r().EqualValues(1499827319559, serverTime)
+	s.r().EqualValues(1499827319559, serverTime.Time)
 }
 
 func (s *serverServiceTestSuite) TestServerTimeError() {
@@ -103,5 +103,5 @@ func (s *serverServiceTestSuite) TestSetServerTime() {
 	timeOffset, err := s.client.NewSetServerTimeService().Do(newContext())
 	s.r().NoError(err)
 	s.r().NotZero(s.client.TimeOffset)
-	s.r().EqualValues(timeOffset, s.client.TimeOffset)
+	s.r().EqualValues(timeOffset.Time, s.client.TimeOffset)
 }

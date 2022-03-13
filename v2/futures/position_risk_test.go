@@ -62,7 +62,7 @@ func (s *positionRiskServiceTestSuite) TestGetPositionRisk() {
 		UnRealizedProfit: "-0.03331353",
 		PositionSide:     "BOTH",
 	}
-	s.assertPositionRiskEqual(e, res[0])
+	s.assertPositionRiskEqual(e, res.PositionRisks[0])
 }
 
 func (s *positionRiskServiceTestSuite) assertPositionRiskEqual(e, a *PositionRisk) {
