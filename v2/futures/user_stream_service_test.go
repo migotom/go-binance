@@ -40,7 +40,7 @@ func (s *userStreamServiceTestSuite) TestKeepaliveUserStream() {
 		s.assertRequestEqual(newSignedRequest().setFormParam("listenKey", listenKey), r)
 	})
 
-	err := s.client.NewKeepaliveUserStreamService().ListenKey(listenKey).Do(newContext())
+	_, err := s.client.NewKeepaliveUserStreamService().ListenKey(listenKey).Do(newContext())
 	s.r().NoError(err)
 }
 

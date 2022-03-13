@@ -12,6 +12,11 @@ type GetPositionRiskService struct {
 	symbol string
 }
 
+type GetPositionRiskResponse struct {
+	PositionRisks     []*PositionRisk `json:"positionRisks"`
+	RateLimitWeight1m string          `json:"rateLimitWeight1m,omitempty"`
+}
+
 // Symbol set symbol
 func (s *GetPositionRiskService) Symbol(symbol string) *GetPositionRiskService {
 	s.symbol = symbol
@@ -19,7 +24,7 @@ func (s *GetPositionRiskService) Symbol(symbol string) *GetPositionRiskService {
 }
 
 // Do send request
-func (s *GetPositionRiskService) Do(ctx context.Context, opts ...RequestOption) (res []*PositionRisk, err error) {
+func (s *GetPositionRiskService) Do(ctx context.Context, opts ...RequestOption) (res *GetPositionRiskResponse, err error) {
 	r := &request{
 		method:   http.MethodGet,
 		endpoint: "/fapi/v2/positionRisk",
@@ -28,15 +33,21 @@ func (s *GetPositionRiskService) Do(ctx context.Context, opts ...RequestOption) 
 	if s.symbol != "" {
 		r.setParam("symbol", s.symbol)
 	}
-	data, _, err := s.c.callAPI(ctx, r, opts...)
+	res = new(GetPositionRiskResponse)
+	var header *http.Header
+	data, header, err := s.c.callAPI(ctx, r, opts...)
 	if err != nil {
-		return []*PositionRisk{}, err
+		return nil, err
 	}
-	res = make([]*PositionRisk, 0)
-	err = json.Unmarshal(data, &res)
+
+	res.PositionRisks = make([]*PositionRisk, 0)
+	res.RateLimitWeight1m = header.Get("X-Mbx-Used-Weight-1m")
+
+	err = json.Unmarshal(data, &res.PositionRisks)
 	if err != nil {
-		return []*PositionRisk{}, err
+		return nil, err
 	}
+
 	return res, nil
 }
 

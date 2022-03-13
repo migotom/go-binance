@@ -45,7 +45,7 @@ func (s *accountServiceTestSuite) TestGetBalance() {
 		AvailableBalance:   "23.72469206",
 		MaxWithdrawAmount:  "23.72469206",
 	}
-	s.assertBalanceEqual(e, res[0])
+	s.assertBalanceEqual(e, res.Balances[0])
 }
 
 func (s *accountServiceTestSuite) assertBalanceEqual(e, a *Balance) {

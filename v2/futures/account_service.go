@@ -11,22 +11,33 @@ type GetBalanceService struct {
 	c *Client
 }
 
+type GetBalanceResponse struct {
+	Balances          []*Balance `json:"balances"`
+	RateLimitWeight1m string     `json:"rateLimitWeight1m,omitempty"`
+}
+
 // Do send request
-func (s *GetBalanceService) Do(ctx context.Context, opts ...RequestOption) (res []*Balance, err error) {
+func (s *GetBalanceService) Do(ctx context.Context, opts ...RequestOption) (res *GetBalanceResponse, err error) {
 	r := &request{
 		method:   http.MethodGet,
 		endpoint: "/fapi/v2/balance",
 		secType:  secTypeSigned,
 	}
-	data, _, err := s.c.callAPI(ctx, r, opts...)
+
+	res = new(GetBalanceResponse)
+	var header *http.Header
+	data, header, err := s.c.callAPI(ctx, r, opts...)
 	if err != nil {
-		return []*Balance{}, err
+		return nil, err
 	}
-	res = make([]*Balance, 0)
-	err = json.Unmarshal(data, &res)
+	res.Balances = make([]*Balance, 0)
+	res.RateLimitWeight1m = header.Get("X-Mbx-Used-Weight-1m")
+
+	err = json.Unmarshal(data, &res.Balances)
 	if err != nil {
-		return []*Balance{}, err
+		return nil, err
 	}
+
 	return res, nil
 }
 
